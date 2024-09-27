@@ -4,7 +4,7 @@ import time
 
 # Configuração da porta serial
 porta_serial = 'COM3'  # Defina a porta serial correta
-baud_rate = 9600  # Defina a taxa de baud do seu NoBreak
+baud_rate = 2800  # Defina a taxa de baud do seu NoBreak
 
 # Sequência hexadecimal para enviar
 hex_string_info = "49 0D"
