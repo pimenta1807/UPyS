@@ -1,5 +1,6 @@
 import time
 import re
+import os
 
 
 # Buscando a tensão que os nobreaks considerem 0% e 100% de carga
@@ -87,3 +88,34 @@ def process_data(data):
     print(f"Tipo de NoBreak:     {'Online' if bits[4] == '0' else 'Offline'}")
     print(f"Desligamento:        {'Ativo' if bits[6] == '1' else 'Desativado'}")
     print(f"Buzzer (Apito):      {'Ativo' if bits[7] == '1' else 'Desativado'}")
+
+
+def log_data(data, name):
+
+    values = data.split()
+    values[0] = values[0].replace("(", "")
+    values[5] = float(values[5])
+    bits = list(values[7])
+    grid = "Bateria" if bits[0] == "1" else "Rede"
+    remaing_capacity = est_battery_capacity(values[5])
+    remaing_capacity = format(remaing_capacity, '.2f')
+
+    header = "Hora;Tensão de Entrada;Tensão de Falha;Tensão de Saída;Corrente de Saída;Voltagem da Bateria;Carga da Bateria;Temperatura;Modo;Status da Bateria;Estado do NoBreak\n"
+    csv_data = f"{time.strftime('%H:%M:%S')};{int(float(values[0]))};{int(float(values[1]))};{int(float(values[2]))};{int(values[3])};{values[5]};{remaing_capacity};{values[6]};{grid};{'Baixa' if bits[1] == '1' else 'Com Carga'};{'Em falha' if bits[3] == '1' else 'OK'}\n"
+
+    file_path = f"../{name}.csv"
+    
+    # Verifica se o arquivo existe
+    file_exists = os.path.isfile(file_path)
+    
+    # Verifica se o arquivo está vazio
+    file_is_empty = os.path.getsize(file_path) == 0 if file_exists else True
+    
+    # Abre o arquivo no modo de anexar
+    with open(file_path, "a") as f:
+        # Adiciona o cabeçalho se o arquivo não existir ou estiver vazio
+        if not file_exists or file_is_empty:
+            f.write(header)
+        
+        # Escreve os dados no arquivo
+        f.write(csv_data)

@@ -7,6 +7,7 @@ import protocols.megatech as megatech
 
 # Configuração da porta serial
 BAUD_RATE = 2800
+LOGGER = False
 
 def clear_screen():
     print("\033[H\033[J")
@@ -52,9 +53,20 @@ def main():
     # Megatec https://networkupstools.org/protocols/megatec.html
     who_is = send_command(ser, "I") # Megatech UPS Information Command
     if who_is:
-        print("Protocolo Megatech Encontrado.")
         company_name, ups_model, version = megatech.process_ups_info(who_is)
         rated_voltage, battery_voltage, frequency = send_command(ser, "F") # Megatech UPS Rating Command
+
+        if LOGGER:
+            print("Modo Logger detectado, iniciando loop de leitura a cada 10 segundos.")
+            while True:
+                start_time = time.perf_counter()
+                answer = send_command(ser, "Q1")
+                if answer:
+                    megatech.log_data(answer, company_name + "_" + ups_model)
+                elapsed_time = time.perf_counter() - start_time  
+                sleep_time = max(0, 10 - elapsed_time)  
+                time.sleep(sleep_time)
+        # Programa acaba aqui se o modo logger estiver ativado.
         while True:
             clear_screen()
             print(f"Nome da empresa: {company_name} - Modelo: {ups_model} - Versão: {version}")
