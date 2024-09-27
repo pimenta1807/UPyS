@@ -48,7 +48,7 @@ def print_commands():
 
     print("""Comandos disponíveis:
 Q1       - Leitura de dados.
-T        - Teste de Bateria (10 segundos.
+T        - Teste a bateria (10 segundos).
 TL       - Testa a bateria até estado baixo e retorna para rede.
 T<n>     - Testa a bateria por <n> minutos.
 Q        - Desabilita beep extra inicial em caso de falha AC.
@@ -56,6 +56,7 @@ S<n>     - Desliga o nobreak em <n> segundos.
 S<n>R<m> - Desliga o nobreak em <n> minutos e religa em <m> minutos.
 C        - Cancela o desligamento programado.
 CT       - Cancela o teste de bateria.
+-1       - Encerra o programa.
 """)
 
 def process_data(data):
