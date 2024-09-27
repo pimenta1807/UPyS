@@ -1,10 +1,29 @@
 import time
+import re
 
 
 # Buscando a tensão que os nobreaks considerem 0% e 100% de carga
 VB0 = 22.0
 VB100 = 25.2
 
+def is_valid_command(command):
+    # Define os padrões para os comandos
+    patterns = [
+        r'^T$',          # Teste de Bateria (10 segundos)
+        r'^TL$',         # Testa a bateria até estado baixo e retorna para rede
+        r'^T\d+$',       # Testa a bateria por <n> minutos
+        r'^Q$',          # Desabilita beep extra inicial em caso de falha AC
+        r'^S\d+$',       # Desliga o nobreak em <n> segundos
+        r'^S\d+R\d+$',   # Desliga o nobreak em <n> minutos e religa em <m> minutos
+        r'^C$',          # Cancela o desligamento programado
+        r'^CT$',         # Cancela o teste de bateria
+    ]
+    
+    # Verifica se o comando corresponde a algum dos padrões
+    for pattern in patterns:
+        if re.match(pattern, command):
+            return True
+    return False
 
 def process_ups_info(info):
     company_name = info[:15].strip()
@@ -13,15 +32,15 @@ def process_ups_info(info):
     return company_name, ups_model, version
 
 def process_rating(rating):
-    valores_rating = rating.split()
-    if len(valores_rating) == 4:
-        tensao_nominal, corrente_nominal, tensao_bateria, frequencia = valores_rating
-        return tensao_nominal, tensao_bateria, frequencia
+    rating_values = rating.split()
+    if len(rating_values) == 4:
+        rated_voltage, rated_current, battery_voltage, frequency = rating_values
+        return rated_voltage, battery_voltage, frequency
     else:
         print("Resposta de classificação do NoBreak está em um formato inesperado.")
 
-def est_battery_capacity(voltagem):
-    remaing_capacity = (voltagem - VB0) / (VB100 - VB0) * 100
+def est_battery_capacity(voltage):
+    remaing_capacity = (voltage - VB0) / (VB100 - VB0) * 100
     return min(max(remaing_capacity, 0), 100)
 
 def print_commands():
@@ -36,32 +55,30 @@ S<n>     - Desliga o nobreak em <n> segundos.
 S<n>R<m> - Desliga o nobreak em <n> minutos e religa em <m> minutos.
 C        - Cancela o desligamento programado.
 CT       - Cancela o teste de bateria.
-I        - Informações do Nobreak.
-F        - Classificação do Nobreak.""")
+""")
 
-def processar_dados(dados):
-    valores = dados.split()
-    valores[0] = valores[0].replace("(", "")
-    valores[5] = float(valores[5])
-    bits = list(valores[7])
+def process_data(data):
+    values = data.split()
+    values[0] = values[0].replace("(", "")
+    values[5] = float(values[5])
+    bits = list(values[7])
     grid = "Bateria" if bits[0] == "1" else "Rede"
-    remaing_capacity = est_battery_capacity(valores[5])
+    remaing_capacity = est_battery_capacity(values[5])
     remaing_capacity = format(remaing_capacity, '.2f')
 
     # Caso algum campo tenha retornado um valor não suportado.
-    valores = [v if v != '@' else 'N/A' for v in valores]
+    values = [v if v != '@' else 'N/A' for v in values]
 
-    print("\033[H\033[J")
     print("Pressione qualquer tecla para sair.\n")
     print(f"Última leitura:      {time.strftime('%H:%M:%S')}")
-    print(f"Tensão de Entrada:   {int(float(valores[0]))} V")
-    print(f"Tensão de Falha:     {int(float(valores[1]))} V")
-    print(f"Tensão de Saída:     {int(float(valores[2]))} V")
-    print(f"Corrente de Saída:   {int(valores[3])} %")
-    print(f"Frequência de Saída: {int(float(valores[4]))} Hz")
-    print(f"Voltagem da Bateria: {valores[5]} V")
-    print(f"Carga da Bateria:    {'Carregando' if valores[5] > 25.6 and grid == 'Rede' else str(remaing_capacity) + ' %'}")
-    print(f"Temperatura:         {valores[6]} °C")
+    print(f"Tensão de Entrada:   {int(float(values[0]))} V")
+    print(f"Tensão de Falha:     {int(float(values[1]))} V")
+    print(f"Tensão de Saída:     {int(float(values[2]))} V")
+    print(f"Corrente de Saída:   {int(values[3])} %")
+    print(f"Frequência de Saída: {int(float(values[4]))} Hz")
+    print(f"Voltagem da Bateria: {values[5]} V")
+    print(f"Carga da Bateria:    {'Carregando' if values[5] > 25.6 and grid == 'Rede' else str(remaing_capacity) + ' %'}")
+    print(f"Temperatura:         {values[6]} °C")
     print(f"Modo:                {grid}")
     print(f"Status da Bateria:   {'Baixa' if bits[1] == '1' else 'Com Carga'}")
     print(f"Modo de Teste:       {'Sim' if bits[5] == '1' else 'Não'}")
