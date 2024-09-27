@@ -32,7 +32,7 @@ def process_ups_info(info):
     version = info[27:37].strip()
     return company_name, ups_model, version
 
-def process_rating(rating):
+def process_ups_rating(rating):
     rating_values = rating.split()
     if len(rating_values) == 4:
         rated_voltage, rated_current, battery_voltage, frequency = rating_values
