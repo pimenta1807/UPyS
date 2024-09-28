@@ -103,7 +103,7 @@ def log_data(data, name):
     header = "Hora;Tensão de Entrada;Tensão de Falha;Tensão de Saída;Corrente de Saída;Voltagem da Bateria;Carga da Bateria;Temperatura;Modo;Status da Bateria;Estado do NoBreak\n"
     csv_data = f"{time.strftime('%H:%M:%S')};{int(float(values[0]))};{int(float(values[1]))};{int(float(values[2]))};{int(values[3])};{values[5]};{remaing_capacity};{values[6]};{grid};{'Baixa' if bits[1] == '1' else 'Com Carga'};{'Em falha' if bits[3] == '1' else 'OK'}\n"
 
-    file_path = f"../{name}.csv"
+    file_path = f"{name}.csv"
     
     # Verifica se o arquivo existe
     file_exists = os.path.isfile(file_path)
