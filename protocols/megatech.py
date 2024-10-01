@@ -4,7 +4,7 @@ import os
 
 
 # Buscando a tensão que os nobreaks considerem 0% e 100% de carga
-VB0 = 22.0
+VB0 = 20.8
 VB100 = 25.2
 
 def is_valid_command(command):
@@ -101,7 +101,7 @@ def log_data(data, name):
     remaing_capacity = est_battery_capacity(values[5])
     remaing_capacity = format(remaing_capacity, '.2f')
 
-    header = "Hora;Tensão de Entrada;Tensão de Falha;Tensão de Saída;Corrente de Saída;Voltagem da Bateria;Carga da Bateria;Temperatura;Modo;Status da Bateria;Estado do NoBreak\n"
+    header = "Hora;VE;VF;VS;Corrente;VB;CB;T;Modo;Estado Bateria;Estado UPS\n"
     csv_data = f"{time.strftime('%H:%M:%S')};{int(float(values[0]))};{int(float(values[1]))};{int(float(values[2]))};{int(values[3])};{values[5]};{remaing_capacity};{values[6]};{grid};{'Baixa' if bits[1] == '1' else 'Com Carga'};{'Em falha' if bits[3] == '1' else 'OK'}\n"
 
     file_path = f"{name}.csv"

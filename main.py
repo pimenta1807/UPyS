@@ -2,6 +2,7 @@ import serial
 import serial.tools.list_ports
 import time
 import protocols.megatech as megatech
+import plots.plots as plots
 #import msvcrt
 
 
@@ -43,6 +44,11 @@ def send_command(ser, command):
 
 def main():
 
+
+    plots.plot_tensao('#TS -222  23101_Senoid  1.csv',
+    ac = ['Tensao de Entrada', 'Tensao de Falha','Tensao de Saida'],
+    dc = ['Voltagem da Bateria', 'Carga da Bateria', 'Temperatura', 'Corrente de Saida']
+    )
     ser = start_serial_connection()
     if not ser:
         print("Nenhuma porta serial disponível.")
